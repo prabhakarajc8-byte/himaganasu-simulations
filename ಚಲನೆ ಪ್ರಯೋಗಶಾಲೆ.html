@@ -1,0 +1,300 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>ಚಲನೆ ಪ್ರಯೋಗಶಾಲೆ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;600;700&display=swap">
+<style>
+/* Layout: one column of three lab benches (motion types, pendulum, speed race), each a surface with canvas + controls */
+:root{
+  --bg:#f3f6f8; --surface:#ffffff; --fg:#162029; --muted:#586774; --line:#d3dce3;
+  --accent:#0b6e8a; --accent2:#d4541f; --canvas:#eaf1f5; --ok:#1d7a46;
+  --font:"Noto Sans Kannada","Nirmala UI","Tunga",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1419; --surface:#161f26; --fg:#e5ecf0; --muted:#94a3ae; --line:#2a3944;
+    --accent:#4cc3e0; --accent2:#ff8a5c; --canvas:#0f181e; --ok:#5fd08a; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1419; --surface:#161f26; --fg:#e5ecf0; --muted:#94a3ae; --line:#2a3944;
+  --accent:#4cc3e0; --accent2:#ff8a5c; --canvas:#0f181e; --ok:#5fd08a; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:16px;line-height:1.65;
+  padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+header h1{font-size:clamp(28px,5vw,40px);line-height:1.25;margin:0 0 6px;text-wrap:balance}
+header p{margin:0;color:var(--muted);max-width:60ch}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+nav a{padding:6px 14px;border:1px solid var(--line);border-radius:999px;color:var(--fg);text-decoration:none;font-weight:600;font-size:14px;background:var(--surface)}
+nav a:hover,nav a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:16px;min-width:0}
+h2{margin:0;font-size:22px;text-wrap:balance}
+h3{margin:0;font-size:16px}
+.lead{margin:0;color:var(--muted);max-width:70ch}
+canvas{width:100%;height:auto;display:block;background:var(--canvas);border-radius:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.card{display:flex;flex-direction:column;gap:8px;min-width:0}
+.card p{margin:0;font-size:14px;color:var(--muted);line-height:1.55}
+.tag{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.02em}
+.row{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:flex-end}
+.ctl{display:flex;flex-direction:column;gap:4px;min-width:180px;flex:1 1 180px}
+.ctl label{font-size:14px;font-weight:600;display:flex;justify-content:space-between;gap:8px}
+.ctl output{color:var(--accent);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=number],select{font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);min-width:0}
+button{font:inherit;font-weight:600;padding:8px 16px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+:root[data-theme="dark"] button.primary,:root:not([data-theme="light"]) button.primary{color:#06232c}
+button.ghost{background:transparent;color:var(--accent)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent2);outline-offset:2px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.stat{border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.stat small{display:block;color:var(--muted);font-size:12.5px}
+.stat b{font-size:22px;font-variant-numeric:tabular-nums}
+.note{background:var(--canvas);border-radius:10px;padding:12px 14px;font-size:14.5px;margin:0}
+.formula{font-weight:700;color:var(--accent)}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14.5px;font-variant-numeric:tabular-nums}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{color:var(--muted);font-size:13px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;font-weight:600}
+.dotA,.dotB{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.dotA{background:var(--accent)}.dotB{background:var(--accent2)}
+.msg{min-height:1.6em;margin:0;font-size:14px;color:var(--accent2);font-weight:600}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>ಚಲನೆ ಪ್ರಯೋಗಶಾಲೆ</h1>
+  <p>ಕಾಲ ಮತ್ತು ಚಲನೆಯ ಅಳತೆ ಪಾಠದ ಸಂವಾದಾತ್ಮಕ ಪ್ರಯೋಗಗಳು. ಸ್ಲೈಡರ್ ಬದಲಿಸಿ, ಚಲನೆಯನ್ನು ನೋಡಿ, ಅಳತೆ ಮಾಡಿ.</p>
+  <nav><a href="#types">1. ಚಲನೆಯ ವಿಧಗಳು</a><a href="#pendulum">2. ಸರಳ ಲೋಲಕ</a><a href="#speed">3. ವೇಗ ಮತ್ತು ಗ್ರಾಫ್</a><a href="#units">4. ಕಾಲದ ಮಾನಗಳು</a></nav>
+</header>
+
+<section id="types">
+  <h2>1. ಚಲನೆಯ ವಿಧಗಳು</h2>
+  <p class="lead">ವಸ್ತು ಚಲಿಸುವ ದಾರಿಯನ್ನು ಗಮನಿಸಿ. ಬಣ್ಣದ ಚುಕ್ಕೆಗಳ ಗೆರೆ ವಸ್ತುವಿನ ಹಿಂದಿನ ಸ್ಥಾನಗಳನ್ನು ತೋರಿಸುತ್ತದೆ.</p>
+  <div class="btns"><button id="tPause" class="ghost">ವಿರಾಮ</button></div>
+  <div class="grid" id="motionGrid"></div>
+</section>
+
+<section id="pendulum">
+  <h2>2. ಸರಳ ಲೋಲಕ: ಆವರ್ತಕಾಲ ಅಳೆಯಿರಿ</h2>
+  <p class="lead">ಲೋಲಕ ಒಂದು ಬದಿಯಿಂದ ಹೊರಟು ಮತ್ತೆ ಅದೇ ಬದಿಗೆ ಬಂದರೆ ಒಂದು ಆಂದೋಲನ. ಒಂದು ಆಂದೋಲನಕ್ಕೆ ಬೇಕಾದ ಕಾಲವೇ ಆವರ್ತಕಾಲ. ಹೆಚ್ಚು ಆಂದೋಲನಗಳ ಕಾಲ ಅಳೆದು ಭಾಗಿಸಿದರೆ ಅಳತೆ ನಿಖರವಾಗುತ್ತದೆ.</p>
+  <canvas id="pc" width="640" height="400"></canvas>
+  <div class="row">
+    <div class="ctl"><label for="pL">ದಾರದ ಉದ್ದ <output id="pLo"></output></label><input type="range" id="pL" min="20" max="200" step="5" value="100"></div>
+    <div class="ctl"><label for="pA">ಆರಂಭಿಕ ಕೋನ <output id="pAo"></output></label><input type="range" id="pA" min="5" max="40" step="1" value="20"></div>
+    <div class="ctl"><label for="pM">ಗುಂಡಿನ ರಾಶಿ <output id="pMo"></output></label><input type="range" id="pM" min="50" max="500" step="50" value="200"></div>
+    <div class="ctl" style="flex:0 1 150px"><label for="pSp">ವೇಗ</label><select id="pSp"><option value="1">1×</option><option value="2">2×</option><option value="5" selected>5×</option></select></div>
+  </div>
+  <div class="btns">
+    <button id="pStart" class="primary">ಆರಂಭಿಸಿ</button>
+    <button id="pReset" class="ghost">ಮರುಹೊಂದಿಸಿ</button>
+    <button id="pRec" class="ghost">ಅಳತೆ ದಾಖಲಿಸಿ</button>
+    <button id="pClr" class="ghost">ಕೋಷ್ಟಕ ಅಳಿಸಿ</button>
+  </div>
+  <p class="msg" id="pMsg" role="status"></p>
+  <div class="stats">
+    <div class="stat"><small>ಸ್ಟಾಪ್‌ವಾಚ್</small><b id="sW">00:00.00</b></div>
+    <div class="stat"><small>ಆಂದೋಲನಗಳು</small><b id="sN">0</b></div>
+    <div class="stat"><small>ಅಳೆದ ಆವರ್ತಕಾಲ (ಸೆ)</small><b id="sT">-</b></div>
+    <div class="stat"><small>ಸೂತ್ರದ ಪ್ರಕಾರ (ಸೆ)</small><b id="sF">-</b></div>
+  </div>
+  <p class="note"><span class="formula">T = 2π √(L ÷ g)</span> ಇಲ್ಲಿ g ≈ 9.8 ಮೀ/ಸೆ². ದಾರದ ಉದ್ದ ಬದಲಿಸಿ ಆವರ್ತಕಾಲ ಬದಲಾಗುತ್ತದೆಯೇ ಎಂದು ನೋಡಿ. ನಂತರ ರಾಶಿ ಮತ್ತು ಕೋನ ಬದಲಿಸಿ ಪ್ರಯತ್ನಿಸಿ. ಸಣ್ಣ ಕೋನಗಳಲ್ಲಿ ಆವರ್ತಕಾಲ ಬಹುತೇಕ ಬದಲಾಗುವುದಿಲ್ಲ.</p>
+  <div class="tablebox">
+    <table><thead><tr><th>ಉದ್ದ (ಸೆಂ.ಮೀ)</th><th>ಕೋನ (°)</th><th>ರಾಶಿ (ಗ್ರಾಂ)</th><th>ಆಂದೋಲನಗಳು</th><th>ಒಟ್ಟು ಕಾಲ (ಸೆ)</th><th>ಆವರ್ತಕಾಲ (ಸೆ)</th></tr></thead>
+    <tbody id="pBody"><tr><td colspan="6" style="color:var(--muted)">ಇನ್ನೂ ಯಾವುದೇ ಅಳತೆ ದಾಖಲಾಗಿಲ್ಲ.</td></tr></tbody></table>
+  </div>
+</section>
+
+<section id="speed">
+  <h2>3. ವೇಗ ಮತ್ತು ದೂರ-ಕಾಲ ಗ್ರಾಫ್</h2>
+  <p class="lead">300 ಮೀ ಓಟದಲ್ಲಿ ಎರಡು ವಾಹನಗಳ ವೇಗ ಬದಲಿಸಿ. ವೇಗ ಹೆಚ್ಚಿದಂತೆ ಗ್ರಾಫ್‌ನ ಗೆರೆ ಹೆಚ್ಚು ಏರುತ್ತದೆ. ಸ್ಥಿರ ವೇಗದ ಗೆರೆ ನೇರವಾಗಿರುತ್ತದೆ.</p>
+  <canvas id="rc" width="700" height="200"></canvas>
+  <div class="row">
+    <div class="ctl"><label for="vA"><span><span class="dotA"></span>ವಾಹನ A ವೇಗ</span><output id="vAo"></output></label><input type="range" id="vA" min="2" max="30" step="1" value="10"></div>
+    <div class="ctl"><label for="vB"><span><span class="dotB"></span>ವಾಹನ B ವೇಗ</span><output id="vBo"></output></label><input type="range" id="vB" min="2" max="30" step="1" value="15"></div>
+  </div>
+  <div class="ctl"><label for="tS">ಕಾಲ <output id="tSo"></output></label><input type="range" id="tS" min="0" max="1000" step="1" value="0"></div>
+  <div class="btns"><button id="rPlay" class="primary">ಓಟ ಆರಂಭಿಸಿ</button><button id="rReset" class="ghost">ಮರುಹೊಂದಿಸಿ</button></div>
+  <div class="stats">
+    <div class="stat"><small>A ಕ್ರಮಿಸಿದ ದೂರ (ಮೀ)</small><b id="dA">0</b></div>
+    <div class="stat"><small>B ಕ್ರಮಿಸಿದ ದೂರ (ಮೀ)</small><b id="dB">0</b></div>
+    <div class="stat"><small>A ಸರಾಸರಿ ವೇಗ (ಮೀ/ಸೆ)</small><b id="sA">-</b></div>
+    <div class="stat"><small>B ಸರಾಸರಿ ವೇಗ (ಮೀ/ಸೆ)</small><b id="sB">-</b></div>
+  </div>
+  <canvas id="gc" width="700" height="320"></canvas>
+  <div class="legend"><span><span class="dotA"></span>ವಾಹನ A</span><span><span class="dotB"></span>ವಾಹನ B</span></div>
+  <p class="note" id="rNote"></p>
+  <p class="note"><span class="formula">ವೇಗ = ದೂರ ÷ ಕಾಲ</span> ಆದ್ದರಿಂದ <span class="formula">ದೂರ = ವೇಗ × ಕಾಲ</span> ಮತ್ತು <span class="formula">ಕಾಲ = ದೂರ ÷ ವೇಗ</span>. ಗ್ರಾಫ್‌ನಲ್ಲಿ ಗೆರೆಯ ಏರುವಿಕೆಯೇ ವೇಗ.</p>
+</section>
+
+<section id="units">
+  <h2>4. ಕಾಲದ ಮಾನಗಳು</h2>
+  <p class="lead">ಸೆಕೆಂಡುಗಳನ್ನು ನಮೂದಿಸಿ. ಅದು ಎಷ್ಟು ಗಂಟೆ, ನಿಮಿಷ, ಸೆಕೆಂಡ್ ಎಂದು ನೋಡಿ.</p>
+  <div class="row">
+    <div class="ctl" style="flex:0 1 220px"><label for="uIn">ಸೆಕೆಂಡುಗಳು</label><input type="number" id="uIn" min="0" step="1" value="3725"></div>
+  </div>
+  <p class="note" id="uOut"></p>
+</section>
+</div>
+
+<script>
+const TAU=Math.PI*2,$=id=>document.getElementById(id);
+const C={};
+function colors(){const s=getComputedStyle(document.documentElement);['accent','accent2','canvas','fg','muted','line'].forEach(n=>C[n]=s.getPropertyValue('--'+n).trim())}
+function setup(c){const d=Math.min(window.devicePixelRatio||1,2),w=c.width,h=c.height;c.width=w*d;c.height=h*d;const x=c.getContext('2d');x.scale(d,d);x.W=w;x.H=h;return x}
+const FONT='"Noto Sans Kannada","Nirmala UI",system-ui,sans-serif';
+function clear(x){x.fillStyle=C.canvas;x.fillRect(0,0,x.W,x.H)}
+
+/* ---------- 1. Types of motion ---------- */
+const motions=[
+ {n:'ರೇಖೀಯ ಚಲನೆ',d:'ವಸ್ತು ನೇರ ರೇಖೆಯಲ್ಲಿ ಚಲಿಸುತ್ತದೆ.',e:'ನೇರ ರಸ್ತೆಯಲ್ಲಿ ಹೋಗುವ ಕಾರು, ಕೆಳಗೆ ಬೀಳುವ ಕಲ್ಲು.',
+  pos:t=>[20+((t*70)%230)+28,112],car:true},
+ {n:'ವೃತ್ತೀಯ ಚಲನೆ',d:'ವಸ್ತು ಒಂದು ಬಿಂದುವಿನ ಸುತ್ತ ವೃತ್ತಾಕಾರದ ಪಥದಲ್ಲಿ ಚಲಿಸುತ್ತದೆ.',e:'ಗಡಿಯಾರದ ಮುಳ್ಳಿನ ತುದಿ, ಭೂಮಿಯ ಸುತ್ತ ಚಂದ್ರ.',
+  pos:t=>[150+58*Math.cos(t*1.6),85+58*Math.sin(t*1.6)],ring:true},
+ {n:'ಆವರ್ತಕ (ದೋಲನ) ಚಲನೆ',d:'ವಸ್ತು ಒಂದೇ ಪಥದಲ್ಲಿ ಅತ್ತಿತ್ತ ನಿಯಮಿತ ಕಾಲದಲ್ಲಿ ಚಲಿಸುತ್ತದೆ.',e:'ಉಯ್ಯಾಲೆ, ಗೋಡೆ ಗಡಿಯಾರದ ಲೋಲಕ.',
+  pos:t=>{const a=0.6*Math.cos(TAU*t/1.8);return [150+120*Math.sin(a),12+120*Math.cos(a)]},pivot:[150,12]},
+ {n:'ಭ್ರಮಣ ಚಲನೆ',d:'ವಸ್ತು ತನ್ನದೇ ಅಕ್ಷದ ಸುತ್ತ ತಿರುಗುತ್ತದೆ.',e:'ತಿರುಗುವ ಚಕ್ರ, ಫ್ಯಾನ್, ಭೂಮಿ ತನ್ನ ಅಕ್ಷದ ಸುತ್ತ.',
+  pos:t=>[150+46*Math.cos(t*2.2),85+46*Math.sin(t*2.2)],wheel:true},
+ {n:'ಅನಿಯತ ಚಲನೆ',d:'ವಸ್ತುವಿನ ದಿಕ್ಕು ಮತ್ತು ವೇಗ ಸದಾ ಬದಲಾಗುತ್ತದೆ.',e:'ಹಾರುವ ಜೇನುನೊಣ, ಜನನಿಬಿಡ ಮಾರುಕಟ್ಟೆಯಲ್ಲಿ ನಡೆಯುವವರು.',
+  pos:t=>[150+85*Math.sin(1.3*t)+30*Math.sin(3.1*t+1),85+42*Math.sin(1.7*t+2)+20*Math.sin(4.3*t)]}
+];
+const grid=$('motionGrid');
+motions.forEach((m,i)=>{
+  const el=document.createElement('div');el.className='card';
+  el.innerHTML='<span class="tag">ವಿಧ '+(i+1)+'</span><h3>'+m.n+'</h3><canvas width="300" height="170"></canvas><p>'+m.d+'</p><p><b>ಉದಾಹರಣೆ:</b> '+m.e+'</p>';
+  grid.appendChild(el);m.x=setup(el.querySelector('canvas'));
+});
+function drawMotion(m,t){
+  const x=m.x;clear(x);x.lineWidth=2;
+  if(m.car){x.strokeStyle=C.line;x.beginPath();x.moveTo(10,136);x.lineTo(290,136);x.stroke();
+    const px=m.pos(t)[0]-28;x.fillStyle=C.accent;x.beginPath();x.roundRect(px,98,56,24,6);x.fill();
+    x.fillStyle=C.fg;[px+13,px+43].forEach(w=>{x.beginPath();x.arc(w,124,7,0,TAU);x.fill()})}
+  if(m.ring){x.strokeStyle=C.line;x.setLineDash([5,5]);x.beginPath();x.arc(150,85,58,0,TAU);x.stroke();x.setLineDash([]);
+    x.fillStyle=C.fg;x.beginPath();x.arc(150,85,4,0,TAU);x.fill()}
+  if(m.pivot){x.strokeStyle=C.line;x.beginPath();x.moveTo(110,12);x.lineTo(190,12);x.stroke();
+    const p=m.pos(t);x.strokeStyle=C.muted;x.beginPath();x.moveTo(150,12);x.lineTo(p[0],p[1]);x.stroke()}
+  if(m.wheel){x.strokeStyle=C.muted;x.beginPath();x.arc(150,85,46,0,TAU);x.stroke();
+    for(let k=0;k<6;k++){const a=t*2.2+k*TAU/6;x.beginPath();x.moveTo(150,85);x.lineTo(150+46*Math.cos(a),85+46*Math.sin(a));x.stroke()}
+    x.fillStyle=C.fg;x.beginPath();x.arc(150,85,5,0,TAU);x.fill()}
+  if(!m.car){for(let k=14;k>=0;k--){const p=m.pos(t-k*0.06);x.globalAlpha=1-k/16;x.fillStyle=C.accent2;
+    x.beginPath();x.arc(p[0],p[1],k===0?8:5*(1-k/16)+1,0,TAU);x.fill()}x.globalAlpha=1}
+}
+let tPaused=false;
+$('tPause').onclick=()=>{tPaused=!tPaused;$('tPause').textContent=tPaused?'ಮುಂದುವರಿಸಿ':'ವಿರಾಮ'};
+
+/* ---------- 2. Pendulum ---------- */
+const px=setup($('pc'));
+const P={t:0,run:false};
+const g=9.8;
+function pp(){return{L:+$('pL').value/100,A:+$('pA').value*Math.PI/180,Ad:+$('pA').value,m:+$('pM').value,Lc:+$('pL').value}}
+function pendT(L){return TAU*Math.sqrt(L/g)}
+function pLabels(){const p=pp();$('pLo').textContent=p.Lc+' ಸೆಂ.ಮೀ';$('pAo').textContent=p.Ad+'°';$('pMo').textContent=p.m+' ಗ್ರಾಂ'}
+function pReset(){P.t=0;P.run=false;$('pStart').textContent='ಆರಂಭಿಸಿ';pLabels();$('pMsg').textContent=''}
+['pL','pA','pM'].forEach(id=>$(id).addEventListener('input',pReset));
+$('pStart').onclick=()=>{P.run=!P.run;$('pStart').textContent=P.run?'ನಿಲ್ಲಿಸಿ':'ಮುಂದುವರಿಸಿ'};
+$('pReset').onclick=pReset;
+const rows=[];
+$('pRec').onclick=()=>{
+  const p=pp(),T=pendT(p.L),n=Math.floor(P.t/T);
+  if(n<1){$('pMsg').textContent='ಕನಿಷ್ಠ ಒಂದು ಆಂದೋಲನ ಪೂರ್ಣವಾದ ಮೇಲೆ ದಾಖಲಿಸಿ.';return}
+  const tt=n*T;rows.push([p.Lc,p.Ad,p.m,n,tt.toFixed(2),(tt/n).toFixed(2)]);
+  $('pBody').innerHTML=rows.map(r=>'<tr>'+r.map(v=>'<td>'+v+'</td>').join('')+'</tr>').join('');
+  $('pMsg').textContent='ಅಳತೆ ದಾಖಲಾಯಿತು.';
+};
+$('pClr').onclick=()=>{rows.length=0;$('pBody').innerHTML='<tr><td colspan="6" style="color:var(--muted)">ಇನ್ನೂ ಯಾವುದೇ ಅಳತೆ ದಾಖಲಾಗಿಲ್ಲ.</td></tr>'};
+function fmtW(s){const m=Math.floor(s/60),r=s-m*60;return String(m).padStart(2,'0')+':'+r.toFixed(2).padStart(5,'0')}
+function stepPend(dt){if(P.run)P.t+=dt*(+$('pSp').value)}
+function drawPend(){
+  const x=px,p=pp(),T=pendT(p.L),S=160,cx=x.W/2,py=44;clear(x);
+  const th=p.A*Math.cos(TAU*P.t/T);
+  x.strokeStyle=C.line;x.lineWidth=2;x.setLineDash([6,6]);
+  x.beginPath();x.moveTo(cx,py);x.lineTo(cx,py+p.L*S+30);x.stroke();
+  [-p.A,p.A].forEach(a=>{x.beginPath();x.moveTo(cx,py);x.lineTo(cx+p.L*S*Math.sin(a),py+p.L*S*Math.cos(a));x.stroke()});
+  x.setLineDash([]);
+  x.beginPath();x.arc(cx,py,p.L*S,Math.PI/2-p.A,Math.PI/2+p.A);x.strokeStyle=C.muted;x.lineWidth=1;x.stroke();
+  x.fillStyle=C.fg;x.fillRect(cx-70,py-12,140,8);
+  const bx=cx+p.L*S*Math.sin(th),by=py+p.L*S*Math.cos(th),r=8+p.m/40;
+  x.strokeStyle=C.fg;x.lineWidth=2;x.beginPath();x.moveTo(cx,py-4);x.lineTo(bx,by);x.stroke();
+  x.fillStyle=C.accent2;x.beginPath();x.arc(bx,by,r,0,TAU);x.fill();
+  x.fillStyle=C.muted;x.font='13px '+FONT;x.textAlign='left';
+  x.fillText('L = '+p.Lc+' ಸೆಂ.ಮೀ',16,py+p.L*S/2);
+  x.fillText('ಕೋನ '+p.Ad+'°',cx+p.L*S*Math.sin(p.A)+10,py+p.L*S*Math.cos(p.A)-6);
+  $('sW').textContent=fmtW(P.t);
+  const n=Math.floor(P.t/T);$('sN').textContent=n;
+  $('sT').textContent=n>0?(n*T/n).toFixed(2):'-';
+  $('sF').textContent=T.toFixed(2);
+}
+
+/* ---------- 3. Speed race ---------- */
+const rx=setup($('rc')),gx=setup($('gc'));
+const R={f:0,run:false},D=300;
+function rp(){const a=+$('vA').value,b=+$('vB').value;return{a,b,tmax:Math.max(D/a,D/b)}}
+function rT(){const q=rp();return R.f/1000*q.tmax}
+function rLabels(){const q=rp();$('vAo').textContent=q.a+' ಮೀ/ಸೆ';$('vBo').textContent=q.b+' ಮೀ/ಸೆ'}
+['vA','vB'].forEach(id=>$(id).addEventListener('input',()=>{rLabels();R.run=false;$('rPlay').textContent='ಓಟ ಆರಂಭಿಸಿ'}));
+$('tS').addEventListener('input',()=>{R.f=+$('tS').value;R.run=false;$('rPlay').textContent='ಓಟ ಆರಂಭಿಸಿ'});
+$('rPlay').onclick=()=>{if(R.f>=1000)R.f=0;R.run=!R.run;$('rPlay').textContent=R.run?'ನಿಲ್ಲಿಸಿ':'ಓಟ ಆರಂಭಿಸಿ'};
+$('rReset').onclick=()=>{R.f=0;R.run=false;$('rPlay').textContent='ಓಟ ಆರಂಭಿಸಿ'};
+function stepRace(dt){if(R.run){R.f+=dt*100;if(R.f>=1000){R.f=1000;R.run=false;$('rPlay').textContent='ಮತ್ತೆ ಓಡಿಸಿ'}}$('tS').value=R.f}
+function carAt(x,px,y,col){x.fillStyle=col;x.beginPath();x.roundRect(px-22,y-13,44,22,6);x.fill();
+  x.fillStyle=C.fg;[px-11,px+11].forEach(w=>{x.beginPath();x.arc(w,y+10,5,0,TAU);x.fill()})}
+function niceStep(m){for(const s of [1,2,5,10,20,50,100])if(m/s<=8)return s;return 100}
+function drawRace(){
+  const q=rp(),t=rT(),x=rx,x0=50,x1=x.W-40;clear(x);
+  const dA=Math.min(q.a*t,D),dB=Math.min(q.b*t,D);
+  x.strokeStyle=C.line;x.lineWidth=2;[[70,'A'],[150,'B']].forEach(([y,l])=>{x.beginPath();x.moveTo(x0,y+14);x.lineTo(x1,y+14);x.stroke();
+    x.fillStyle=C.muted;x.font='bold 14px '+FONT;x.textAlign='right';x.fillText(l,x0-14,y+6)});
+  x.setLineDash([4,4]);x.beginPath();x.moveTo(x1,40);x.lineTo(x1,185);x.stroke();x.setLineDash([]);
+  x.fillStyle=C.muted;x.font='12px '+FONT;x.textAlign='center';x.fillText('0',x0,194);x.fillText('300 ಮೀ',x1,194);
+  carAt(x,x0+dA/D*(x1-x0),70,C.accent);carAt(x,x0+dB/D*(x1-x0),150,C.accent2);
+  $('tSo').textContent=t.toFixed(1)+' ಸೆ';
+  $('dA').textContent=dA.toFixed(0);$('dB').textContent=dB.toFixed(0);
+  $('sA').textContent=t>0?(dA/t).toFixed(1):'-';$('sB').textContent=t>0?(dB/t).toFixed(1):'-';
+  const ta=D/q.a,tb=D/q.b;let s='A ಗೆ 300 ಮೀ ಕ್ರಮಿಸಲು '+ta.toFixed(1)+' ಸೆ, B ಗೆ '+tb.toFixed(1)+' ಸೆ ಬೇಕು. ';
+  s+=Math.abs(ta-tb)<0.05?'ಇಬ್ಬರೂ ಒಟ್ಟಿಗೆ ತಲುಪುತ್ತಾರೆ.':(ta<tb?'A ಮೊದಲು ತಲುಪುತ್ತದೆ.':'B ಮೊದಲು ತಲುಪುತ್ತದೆ.');
+  $('rNote').textContent=s;
+}
+function drawGraph(){
+  const q=rp(),t=rT(),x=gx,l=58,b=44,tp=16,r=20,pw=x.W-l-r,ph=x.H-tp-b;clear(x);
+  const X=v=>l+v/q.tmax*pw,Y=v=>tp+ph-v/D*ph;
+  x.font='12px '+FONT;x.lineWidth=1;
+  for(let v=0;v<=D;v+=50){x.strokeStyle=C.line;x.beginPath();x.moveTo(l,Y(v));x.lineTo(l+pw,Y(v));x.stroke();
+    x.fillStyle=C.muted;x.textAlign='right';x.fillText(v,l-8,Y(v)+4)}
+  const st=niceStep(q.tmax);x.textAlign='center';
+  for(let v=0;v<=q.tmax+1e-6;v+=st){x.strokeStyle=C.line;x.beginPath();x.moveTo(X(v),tp);x.lineTo(X(v),tp+ph);x.stroke();
+    x.fillStyle=C.muted;x.fillText(v,X(v),tp+ph+16)}
+  x.fillStyle=C.fg;x.font='13px '+FONT;x.fillText('ಕಾಲ (ಸೆಕೆಂಡ್)',l+pw/2,x.H-6);
+  x.save();x.translate(14,tp+ph/2);x.rotate(-Math.PI/2);x.fillText('ದೂರ (ಮೀಟರ್)',0,0);x.restore();
+  [[q.a,C.accent],[q.b,C.accent2]].forEach(([v,col])=>{
+    const tf=D/v,te=Math.min(t,tf);
+    x.strokeStyle=col;x.globalAlpha=.3;x.lineWidth=2;x.setLineDash([5,5]);x.beginPath();x.moveTo(X(0),Y(0));x.lineTo(X(tf),Y(D));x.stroke();
+    x.setLineDash([]);x.globalAlpha=1;x.lineWidth=3;x.beginPath();x.moveTo(X(0),Y(0));x.lineTo(X(te),Y(v*te));x.stroke();
+    x.fillStyle=col;x.beginPath();x.arc(X(te),Y(v*te),6,0,TAU);x.fill()});
+  x.strokeStyle=C.fg;x.globalAlpha=.4;x.lineWidth=1;x.beginPath();x.moveTo(X(t),tp);x.lineTo(X(t),tp+ph);x.stroke();x.globalAlpha=1;
+}
+
+/* ---------- 4. Units ---------- */
+function units(){
+  const s=Math.max(0,Math.floor(+$('uIn').value||0)),h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=s%60;
+  $('uOut').innerHTML=s+' ಸೆಕೆಂಡ್ = <b>'+h+' ಗಂಟೆ '+m+' ನಿಮಿಷ '+r+' ಸೆಕೆಂಡ್</b>. 1 ನಿಮಿಷ = 60 ಸೆಕೆಂಡ್, 1 ಗಂಟೆ = 60 ನಿಮಿಷ = 3600 ಸೆಕೆಂಡ್.';
+}
+$('uIn').addEventListener('input',units);
+
+/* ---------- loop ---------- */
+pLabels();rLabels();units();
+let last=performance.now(),T0=0;
+function frame(now){
+  const dt=Math.min(.05,(now-last)/1000);last=now;colors();
+  if(!tPaused)T0+=dt;
+  motions.forEach(m=>drawMotion(m,T0));
+  stepPend(dt);drawPend();stepRace(dt);drawRace();drawGraph();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+
+</body></html>

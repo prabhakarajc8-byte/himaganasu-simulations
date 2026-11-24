@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="kn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ಹೃದಯದ ಅಡ್ಡ ಸೀಳಿಕೆ ಮತ್ತು ರಕ್ತಪರಿಚಲನೆ</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🫀</text></svg>">
+<style>
+:root{--bg:#f3f7fb;--card:#fff;--ink:#1c2f44;--mut:#52677c;--line:#d6e2ec;--wall:#c98a8a;--ves-b:#9db8f0;--ves-r:#f0a0a8;--bl:#5b84e0;--rd:#e04a58;--acc:#a3223f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101a26;--card:#192a3b;--ink:#e8f0f7;--mut:#a7bbcc;--line:#2d4357;--wall:#7d4a55;--ves-b:#3f5f9f;--ves-r:#9a4450;--acc:#ff8097;color-scheme:dark}}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;padding:12px;background:var(--bg);color:var(--ink);font-family:"Noto Sans Kannada","Nirmala UI",system-ui,sans-serif}
+h1{text-align:center;font-size:clamp(1.2rem,2.8vw,1.8rem);margin:4px 0 10px}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 16px;justify-content:center;align-items:center;margin-bottom:10px}
+.ctl button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:18px;padding:5px 13px}
+.ctl button.cur{border-color:var(--acc);color:var(--acc);font-weight:600}
+.ctl label{display:flex;gap:7px;align-items:center;color:var(--mut);font-size:.9rem}
+button:focus-visible,input:focus-visible,.h:focus-visible{outline:3px solid #ffb703;outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:12px;max-width:1200px;margin:auto}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px}
+.card h2{font-size:1rem;margin:0 0 6px}
+svg{display:block;width:100%;height:auto}
+.h{cursor:pointer}
+.h:hover,.h.on{filter:drop-shadow(0 0 5px #ffb703)}
+text{font-family:inherit}
+.lb{font-size:12px;fill:var(--ink)}.lw{font-size:13px;fill:#fff;font-weight:600;pointer-events:none}
+.col{display:flex;flex-direction:column;gap:12px}
+#st{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:.88rem;color:var(--mut)}
+#st b{color:var(--ink)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+#ph{font-size:1.05rem;font-weight:700;color:var(--acc);margin-bottom:4px}
+#info{border-left:6px solid var(--acc);min-height:96px}
+#info h3{margin:0 0 4px;font-size:1rem}#info p{margin:0;color:var(--mut);line-height:1.7}
+</style>
+</head>
+<body>
+<h1>ಹೃದಯದ ಅಡ್ಡ ಸೀಳಿಕೆ ಮತ್ತು ರಕ್ತಪರಿಚಲನೆ ವ್ಯೂಹ</h1>
+<div class="ctl">
+ <button id="pp">⏸ ನಿಲ್ಲಿಸಿ</button>
+ <span id="pb"></span>
+ <label>ಹೃದಯ ಬಡಿತ <input id="bpm" type="range" min="40" max="180" value="72"> <b id="bv">72</b>/ನಿಮಿಷ</label>
+ <label>ನಿಧಾನಗತಿ <input id="slow" type="range" min="0.15" max="1" step="0.05" value="0.5"> <b id="sv">0.5×</b></label>
+</div>
+<div class="grid">
+ <div class="card"><h2>ಹೃದಯದ ಅಡ್ಡ ಸೀಳಿಕೆ (ಚಿತ್ರದ ಯಾವುದೇ ಭಾಗ ಕ್ಲಿಕ್ ಮಾಡಿ)</h2>
+ <svg id="hs" viewBox="0 0 520 520" role="img" aria-label="ಹೃದಯದ ಅಡ್ಡ ಸೀಳಿಕೆ"></svg></div>
+ <div class="col">
+  <div class="card"><div id="ph"></div><div id="st"></div></div>
+  <div class="card"><h2>ಹೃದಯ ಚಕ್ರ ಮತ್ತು ECG</h2>
+   <svg id="ecg" viewBox="0 0 600 120" role="img" aria-label="ECG"></svg></div>
+  <div class="card"><h2>ದ್ವಿಪರಿಚಲನೆ: ಶ್ವಾಸಕೋಶ ಮತ್ತು ದೇಹ</h2>
+   <svg id="ds" viewBox="0 0 300 360" role="img" aria-label="ದ್ವಿಪರಿಚಲನೆ"></svg></div>
+  <div class="card" id="info" aria-live="polite"><h3>ಮಾಹಿತಿ</h3><p>ಹೃದಯದ ಕೋಣೆ, ಕವಾಟ ಅಥವಾ ರಕ್ತನಾಳದ ಮೇಲೆ ಕ್ಲಿಕ್ ಮಾಡಿ. ನೀಲಿ = ಆಮ್ಲಜನಕ ಕಡಿಮೆ ರಕ್ತ, ಕೆಂಪು = ಆಮ್ಲಜನಕಯುಕ್ತ ರಕ್ತ.</p></div>
+ </div>
+</div>
+<script>
+const NS='http://www.w3.org/2000/svg',$=s=>document.querySelector(s);
+const E=(p,t,a={},tx)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(tx)e.textContent=tx;p.append(e);return e};
+const hs=$('#hs'),ds=$('#ds'),ecg=$('#ecg');
+const clamp=x=>x<0?0:x>1?1:x,ease=x=>{x=clamp(x);return x*x*(3-2*x)};
+/* ---- heart drawing ---- */
+const V=(d,w,c,k)=>E(hs,'path',{d,fill:'none',stroke:`var(--ves-${c})`,'stroke-width':w,'stroke-linecap':'butt',class:'h','data-k':k,tabindex:0});
+E(hs,'rect',{x:118,y:160,width:284,height:300,rx:55,fill:'var(--wall)'});
+V('M163 0V200',26,'b','svc');V('M100 520V275Q100 240 140 232',24,'b','ivc');
+V('M240 300V120Q240 100 200 92H0',24,'b','pa');V('M282 300V120Q282 55 370 52H520',24,'r','ao');
+V('M520 195H380',20,'r','pv');V('M520 250H380',20,'r','pv');
+E(hs,'rect',{x:246,y:292,width:26,height:150,fill:'#8a4a52',opacity:.6});
+const CH={ra:[128,170,97,100,'bl','ಬಲ ಹೃತ್ಕರ್ಣ'],la:[295,170,97,100,'rd','ಎಡ ಹೃತ್ಕರ್ಣ'],rv:[148,292,98,150,'bl','ಬಲ ಕುಹರ'],lv:[272,292,120,150,'rd','ಎಡ ಕುಹರ']};
+for(const k in CH){const c=CH[k];c.push(E(hs,'rect',{x:c[0],y:c[1],width:c[2],height:c[3],rx:22,fill:`var(--${c[4]})`,class:'h','data-k':k,tabindex:0}))}
+const tx=(x,y,s,c='lw',a='middle')=>E(hs,'text',{x,y,class:c,'text-anchor':a},s);
+tx(176,225,'ಬಲ ಹೃತ್ಕರ್ಣ');tx(344,225,'ಎಡ ಹೃತ್ಕರ್ಣ');tx(197,375,'ಬಲ ಕುಹರ');tx(332,375,'ಎಡ ಕುಹರ');
+tx(176,14,'ಮೇಲ್ಮಹಾಸಿರೆ','lb','start');tx(176,30,'(SVC)','lb','start');
+tx(92,500,'ಕೆಳ','lb','end');tx(92,515,'ಮಹಾಸಿರೆ','lb','end');
+tx(8,78,'ಶ್ವಾಸಕೋಶ ಅಪಧಮನಿ','lb','start');tx(8,118,'→ ಶ್ವಾಸಕೋಶಕ್ಕೆ','lb','start');
+tx(512,44,'ಮಹಾಅಪಧಮನಿ → ದೇಹಕ್ಕೆ','lb','end');tx(512,178,'ಶ್ವಾಸಕೋಶ ಸಿರೆಗಳು','lb','end');tx(512,236,'← ಶ್ವಾಸಕೋಶದಿಂದ','lb','end');
+const valves=[
+ ['tri','av',[[135,281,1,42],[223,281,-1,42]]],['mit','av',[[302,281,1,44],[390,281,-1,44]]],
+ ['pul','sl',[[228,292,1,12],[252,292,-1,12]]],['aor','sl',[[270,292,1,12],[294,292,-1,12]]]];
+const VH={tri:[135,268,90,26],mit:[302,268,88,26],pul:[226,282,28,20],aor:[268,282,28,20]};
+const flaps=[];
+for(const [id,ty,fl] of valves){const g=E(hs,'g',{class:'h','data-k':id,tabindex:0});const h=VH[id];E(g,'rect',{x:h[0],y:h[1],width:h[2],height:h[3],fill:'transparent'});
+ for(const [x,y,d,l] of fl)flaps.push({id,ty,x,y,d,el:E(g,'line',{x1:x,y1:y,x2:x+d*l,y2:y,stroke:'#ffd166','stroke-width':4,'stroke-linecap':'round'})})}
+tx(176,266,'ತ್ರಿಪರ್ಣ ಕವಾಟ','lb');
+/* ---- flows ---- */
+const FL=[],mk=(svg,d,col,win,sp,N=6)=>{const p=E(svg,'path',{d,fill:'none'});const dots=[...Array(N)].map(()=>E(svg,'circle',{r:4.5,fill:col,stroke:'#fff','stroke-width':1.2}));FL.push({p,L:p.getTotalLength(),dots,win,sp,pr:Math.random(),o:1,N})};
+const AVW=p=>p<.12||p>=.5,SLW=p=>p>=.17&&p<.42;
+mk(hs,'M163 0V170','#2a4fb8',null,.35);mk(hs,'M100 520V275Q100 240 140 232H160','#2a4fb8',null,.35);
+mk(hs,'M178 200V420','#2a4fb8',AVW,.55);mk(hs,'M205 420Q240 380 240 292V120Q240 100 200 92H0','#2a4fb8',SLW,.9);
+mk(hs,'M520 195H350','#b01e2f',null,.35);mk(hs,'M520 250H350','#b01e2f',null,.35);
+mk(hs,'M345 200V420','#b01e2f',AVW,.55);mk(hs,'M330 420Q282 380 282 292V120Q282 55 370 52H520','#b01e2f',SLW,.9);
+/* ---- double circulation ---- */
+E(ds,'ellipse',{cx:150,cy:45,rx:52,ry:26,fill:'var(--ves-r)',class:'h','data-k':'lung'});E(ds,'text',{x:150,y:49,'text-anchor':'middle',class:'lb'},'ಶ್ವಾಸಕೋಶ');
+E(ds,'rect',{x:95,y:308,width:110,height:34,rx:10,fill:'var(--ves-b)',class:'h','data-k':'body'});E(ds,'text',{x:150,y:329,'text-anchor':'middle',class:'lb'},'ದೇಹದ ಅಂಗಗಳು');
+[[118,150,'bl'],[152,150,'rd'],[118,182,'bl'],[152,182,'rd']].forEach(a=>E(ds,'rect',{x:a[0],y:a[1],width:32,height:30,rx:6,fill:`var(--${a[2]})`}));
+mk(ds,'M125 182C40 175 40 60 100 48','#2a4fb8',SLW,.8,5);mk(ds,'M200 48C260 60 260 170 175 152','#b01e2f',null,.4,5);
+mk(ds,'M182 205C270 220 270 320 205 325','#b01e2f',SLW,.8,5);mk(ds,'M95 325C30 320 30 190 118 165','#2a4fb8',null,.4,5);
+E(ds,'text',{x:20,y:120,class:'lb'},'ಬಲ');E(ds,'text',{x:258,y:120,class:'lb'},'ಎಡ');
+/* ---- ECG ---- */
+const g=(x,c,s,a)=>a*Math.exp(-((x-c)**2)/(2*s*s));
+const wave=x=>g(x,.05,.02,.25)+g(x,.115,.005,-.2)+g(x,.135,.006,1)+g(x,.155,.006,-.3)+g(x,.33,.04,.35);
+[[0,.12,'ಹೃತ್ಕರ್ಣ ಸಂಕೋಚನ','#e9b949'],[.12,.42,'ಕುಹರ ಸಂಕೋಚನ','#e04a58'],[.42,1,'ವಿಶ್ರಾಂತಿ (ಕುಹರ ತುಂಬುವಿಕೆ)','#5b84e0']].forEach(b=>{E(ecg,'rect',{x:10+b[0]*580,y:6,width:(b[1]-b[0])*580,height:108,fill:b[3],opacity:.18});E(ecg,'text',{x:10+(b[0]+b[1])/2*580,y:20,'text-anchor':'middle',class:'lb',style:'font-size:10px'},b[2])});
+let pts='';for(let i=0;i<=290;i++){const x=i/290;pts+=`${10+x*580},${85-wave(x)*50} `}
+E(ecg,'polyline',{points:pts,fill:'none',stroke:'var(--ink)','stroke-width':2});
+const cur=E(ecg,'line',{y1:6,y2:114,stroke:'#ffb703','stroke-width':3});
+const snd=E(ecg,'text',{x:300,y:108,'text-anchor':'middle',class:'lb',style:'font-size:14px;font-weight:700;fill:var(--acc)'});
+/* ---- state & loop ---- */
+let t=0,playing=true,last=performance.now(),bpm=72,slow=.5,pv=0,sndT=0;
+const op={tri:0,mit:0,pul:0,aor:0},names={tri:'ತ್ರಿಪರ್ಣ',mit:'ದ್ವಿಪರ್ಣ',pul:'ಶ್ವಾಸಕೋಶ ಅರ್ಧಚಂದ್ರ',aor:'ಮಹಾಅಪಧಮನಿ ಅರ್ಧಚಂದ್ರ'};
+const st=$('#st');st.innerHTML='<div id="s1"></div><div id="s2"></div><div id="s3"></div><div id="s4"></div>';
+const PH=[['ಹೃತ್ಕರ್ಣ ಸಂಕೋಚನ','ಹೃತ್ಕರ್ಣಗಳು ಸಂಕುಚಿತಗೊಂಡು ಉಳಿದ ರಕ್ತವನ್ನು ಕುಹರಗಳಿಗೆ ತಳ್ಳುತ್ತವೆ.'],['ಕುಹರ ಸಂಕೋಚನ','ಕುಹರಗಳು ಸಂಕುಚಿತಗೊಂಡು ರಕ್ತವನ್ನು ಅಪಧಮನಿಗಳಿಗೆ ಪಂಪ್ ಮಾಡುತ್ತವೆ.'],['ವಿಶ್ರಾಂತಿ','ಹೃದಯ ವಿಶ್ರಾಂತಿಯಲ್ಲಿದ್ದು ಹೃತ್ಕರ್ಣಗಳು ಸಿರೆಗಳಿಂದ ರಕ್ತ ತುಂಬಿಕೊಳ್ಳುತ್ತವೆ.']];
+function render(p){
+ const a=p<.12?Math.sin(p/.12*Math.PI):0,v=p<.12?0:p<.22?ease((p-.12)/.1):p<.4?1:1-ease((p-.4)/.15);
+ const sA=1-.2*a+.1*v,sV=1-.22*v+.05*a;
+ for(const k in CH){const c=CH[k],s=k[1]=='a'?sA:sV,cx=c[0]+c[2]/2,cy=c[1]+c[3]/2;c[6].setAttribute('transform',`translate(${cx} ${cy}) scale(${s}) translate(${-cx} ${-cy})`)}
+ const tg={tri:AVW(p),mit:AVW(p),pul:SLW(p),aor:SLW(p)};
+ for(const k in tg)op[k]+=((tg[k]?1:0)-op[k])*.25;
+ for(const f of flaps){const o=op[f.id];f.el.setAttribute('transform',`rotate(${(f.ty=='av'?f.d:-f.d)*65*o} ${f.x} ${f.y})`)}
+ const i=p<.12?0:p<.42?1:2;$('#ph').textContent=PH[i][0];
+ [['tri','s1'],['mit','s2'],['pul','s3'],['aor','s4']].forEach(([k,id])=>{const o=tg[k];$('#'+id).innerHTML=`<span class="dot" style="background:${o?'#2e9d5b':'#b33'}"></span>${names[k]}: <b>${o?'ತೆರೆದಿದೆ':'ಮುಚ್ಚಿದೆ'}</b>`});
+ $('#ph').title=PH[i][1];$('#pd').textContent=PH[i][1];
+ const x=10+p*580;cur.setAttribute('x1',x);cur.setAttribute('x2',x);
+ const s=(p>=.12&&p<.2)?'ಲಬ್ (AV ಕವಾಟ ಮುಚ್ಚುತ್ತದೆ)':(p>=.42&&p<.5)?'ಡಬ್ (ಅರ್ಧಚಂದ್ರ ಕವಾಟ ಮುಚ್ಚುತ್ತದೆ)':'';snd.textContent=s;
+ document.querySelectorAll('#pb button').forEach((b,j)=>b.classList.toggle('cur',j==i))}
+function frame(n){const dt=Math.min(.05,(n-last)/1000);last=n;const d=dt*bpm/60*slow;
+ if(playing)t=(t+d)%1;const act=[];
+ for(const f of FL){const on=playing&&(!f.win||f.win(t));if(on)f.pr+=d*f.sp*2.2;f.o+=((f.win?(on?1:.15):1)-f.o)*.2;
+  f.dots.forEach((c,i)=>{const u=((f.pr+i/f.N)%1)*f.L,q=f.p.getPointAtLength(u);c.setAttribute('cx',q.x);c.setAttribute('cy',q.y);c.setAttribute('opacity',f.o)})}
+ render(t);requestAnimationFrame(frame)}
+$('#ph').insertAdjacentHTML('afterend','<div id="pd" style="font-size:.9rem;margin-bottom:6px;color:var(--mut)"></div>');
+/* controls */
+const pb=$('#pb');[['ಹೃತ್ಕರ್ಣ ಸಂಕೋಚನ',.06],['ಕುಹರ ಸಂಕೋಚನ',.28],['ವಿಶ್ರಾಂತಿ',.7]].forEach(([n,v])=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>{t=v;playing=false;$('#pp').textContent='▶ ಮುಂದುವರಿಸಿ'};pb.append(b)});
+$('#pp').onclick=()=>{playing=!playing;$('#pp').textContent=playing?'⏸ ನಿಲ್ಲಿಸಿ':'▶ ಮುಂದುವರಿಸಿ'};
+$('#bpm').oninput=e=>{bpm=+e.target.value;$('#bv').textContent=bpm};
+$('#slow').oninput=e=>{slow=+e.target.value;$('#sv').textContent=slow.toFixed(2).replace(/0$/,'')+'×'};
+/* info */
+const I={
+ra:['ಬಲ ಹೃತ್ಕರ್ಣ (Right atrium)','ಮೇಲ್ಮಹಾಸಿರೆ ಮತ್ತು ಕೆಳ ಮಹಾಸಿರೆಗಳ ಮೂಲಕ ದೇಹದಿಂದ ಬರುವ ಆಮ್ಲಜನಕ ಕಡಿಮೆ ರಕ್ತವನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ.'],
+rv:['ಬಲ ಕುಹರ (Right ventricle)','ರಕ್ತವನ್ನು ಶ್ವಾಸಕೋಶ ಅಪಧಮನಿಯ ಮೂಲಕ ಶ್ವಾಸಕೋಶಕ್ಕೆ ಪಂಪ್ ಮಾಡುತ್ತದೆ. ಶ್ವಾಸಕೋಶ ಹತ್ತಿರವಿರುವುದರಿಂದ ಇದರ ಗೋಡೆ ತೆಳು.'],
+la:['ಎಡ ಹೃತ್ಕರ್ಣ (Left atrium)','ಶ್ವಾಸಕೋಶ ಸಿರೆಗಳ ಮೂಲಕ ಬರುವ ಆಮ್ಲಜನಕಯುಕ್ತ ರಕ್ತವನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ.'],
+lv:['ಎಡ ಕುಹರ (Left ventricle)','ಹೃದಯದ ಅತಿ ಬಲಿಷ್ಠ ಕೋಣೆ. ಮಹಾಅಪಧಮನಿಯ ಮೂಲಕ ಇಡೀ ದೇಹಕ್ಕೆ ರಕ್ತ ಪಂಪ್ ಮಾಡಲು ದಪ್ಪ ಸ್ನಾಯುಗೋಡೆ ಹೊಂದಿದೆ.'],
+tri:['ತ್ರಿಪರ್ಣ ಕವಾಟ (Tricuspid valve)','ಬಲ ಹೃತ್ಕರ್ಣ ಮತ್ತು ಬಲ ಕುಹರದ ನಡುವೆ ಇದ್ದು ರಕ್ತ ಹಿಂದಕ್ಕೆ ಹರಿಯದಂತೆ ತಡೆಯುತ್ತದೆ. ಕುಹರ ಸಂಕೋಚನದಲ್ಲಿ ಮುಚ್ಚುತ್ತದೆ.'],
+mit:['ದ್ವಿಪರ್ಣ (ಮಿಟ್ರಲ್) ಕವಾಟ','ಎಡ ಹೃತ್ಕರ್ಣ ಮತ್ತು ಎಡ ಕುಹರದ ನಡುವೆ ಇದ್ದು ರಕ್ತ ಒಂದೇ ದಿಕ್ಕಿನಲ್ಲಿ ಹರಿಯುವಂತೆ ಮಾಡುತ್ತದೆ.'],
+pul:['ಶ್ವಾಸಕೋಶ ಅರ್ಧಚಂದ್ರ ಕವಾಟ','ಬಲ ಕುಹರದಿಂದ ಶ್ವಾಸಕೋಶ ಅಪಧಮನಿಗೆ ರಕ್ತ ಹೋಗಲು ಕುಹರ ಸಂಕೋಚನದಲ್ಲಿ ತೆರೆದು, ವಿಶ್ರಾಂತಿಯಲ್ಲಿ ಮುಚ್ಚುತ್ತದೆ.'],
+aor:['ಮಹಾಅಪಧಮನಿ ಅರ್ಧಚಂದ್ರ ಕವಾಟ','ಎಡ ಕುಹರದಿಂದ ಮಹಾಅಪಧಮನಿಗೆ ರಕ್ತ ಹೋಗಲು ತೆರೆದು, ವಿಶ್ರಾಂತಿಯಲ್ಲಿ ಮುಚ್ಚಿ ರಕ್ತ ಮರಳದಂತೆ ತಡೆಯುತ್ತದೆ. ಇದರ ಮುಚ್ಚುವಿಕೆಯೇ "ಡಬ್" ಶಬ್ದ.'],
+svc:['ಮೇಲ್ಮಹಾಸಿರೆ (Superior vena cava)','ತಲೆ, ಕುತ್ತಿಗೆ ಮತ್ತು ತೋಳುಗಳಿಂದ ರಕ್ತವನ್ನು ಬಲ ಹೃತ್ಕರ್ಣಕ್ಕೆ ತರುತ್ತದೆ.'],
+ivc:['ಕೆಳ ಮಹಾಸಿರೆ (Inferior vena cava)','ದೇಹದ ಕೆಳಭಾಗದಿಂದ ರಕ್ತವನ್ನು ಬಲ ಹೃತ್ಕರ್ಣಕ್ಕೆ ತರುತ್ತದೆ.'],
+pa:['ಶ್ವಾಸಕೋಶ ಅಪಧಮನಿ','ಆಮ್ಲಜನಕ ಕಡಿಮೆ ರಕ್ತವನ್ನು ಶ್ವಾಸಕೋಶಗಳಿಗೆ ಒಯ್ಯುತ್ತದೆ. ಆಮ್ಲಜನಕ ಕಡಿಮೆ ರಕ್ತ ಒಯ್ಯುವ ಏಕೈಕ ಅಪಧಮನಿ ಇದು.'],
+pv:['ಶ್ವಾಸಕೋಶ ಸಿರೆಗಳು','ಶ್ವಾಸಕೋಶದಲ್ಲಿ ಆಮ್ಲಜನಕ ಪಡೆದ ರಕ್ತವನ್ನು ಎಡ ಹೃತ್ಕರ್ಣಕ್ಕೆ ತರುತ್ತವೆ.'],
+ao:['ಮಹಾಅಪಧಮನಿ (Aorta)','ದೇಹದ ಅತಿ ದೊಡ್ಡ ಅಪಧಮನಿ; ಆಮ್ಲಜನಕಯುಕ್ತ ರಕ್ತವನ್ನು ಎಲ್ಲ ಅಂಗಗಳಿಗೆ ಹಂಚುತ್ತದೆ.'],
+lung:['ಶ್ವಾಸಕೋಶ ಪರಿಚಲನೆ','ಬಲ ಕುಹರ → ಶ್ವಾಸಕೋಶ → ಎಡ ಹೃತ್ಕರ್ಣ. ಇಲ್ಲಿ ರಕ್ತ CO₂ ಬಿಟ್ಟು ಆಮ್ಲಜನಕ ಪಡೆಯುತ್ತದೆ (ನೀಲಿ → ಕೆಂಪು).'],
+body:['ದೈಹಿಕ ಪರಿಚಲನೆ','ಎಡ ಕುಹರ → ದೇಹದ ಅಂಗಗಳು → ಬಲ ಹೃತ್ಕರ್ಣ. ಇಲ್ಲಿ ರಕ್ತ ಆಮ್ಲಜನಕ ಮತ್ತು ಪೋಷಕಾಂಶ ಕೊಟ್ಟು CO₂ ಪಡೆಯುತ್ತದೆ (ಕೆಂಪು → ನೀಲಿ).']};
+const info=$('#info');
+function pick(t){const k=t.dataset.k,d=I[k];if(!d)return;document.querySelectorAll('.on').forEach(x=>x.classList.remove('on'));document.querySelectorAll(`[data-k="${k}"]`).forEach(x=>x.classList.add('on'));info.innerHTML='<h3></h3><p></p>';info.firstChild.textContent=d[0];info.lastChild.textContent=d[1]}
+document.addEventListener('click',e=>{const t=e.target.closest('.h');if(t)pick(t)});
+document.addEventListener('keydown',e=>{if((e.key=='Enter'||e.key==' ')&&e.target.classList&&e.target.classList.contains('h')){e.preventDefault();pick(e.target)}});
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

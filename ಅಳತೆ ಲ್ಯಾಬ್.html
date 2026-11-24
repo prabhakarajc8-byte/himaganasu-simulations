@@ -1,0 +1,544 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>ಅಳತೆ ಲ್ಯಾಬ್</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Tamma+2:wght@500;700&family=Noto+Sans+Kannada:wght@400;500;700&display=swap">
+<style>
+/* Layout: a lab bench. Four tabs (litre beaker, metre ruler, converter, quiz) share one frame.
+   Water blue marks volume, ruler yellow marks length. */
+:root {
+  --bg: #F3F7F8;
+  --surface: #FFFFFF;
+  --fg: #12303B;
+  --muted: #55707A;
+  --line: #CFDDE1;
+  --water: #1F86C8;
+  --water-soft: #D9ECF8;
+  --on-water: #FFFFFF;
+  --ruler: #E3A72F;
+  --ruler-ink: #6B4A06;
+  --ruler-soft: #FBF0D2;
+  --on-ruler: #2B1D00;
+  --good: #1E8A5A;
+  --good-soft: #DCF3E8;
+  --bad: #C2412F;
+  --bad-soft: #FBE3DE;
+  --font-display: 'Baloo Tamma 2', 'Noto Sans Kannada', system-ui, sans-serif;
+  --font-body: 'Noto Sans Kannada', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1B21; --surface: #162830; --fg: #E4F0F3; --muted: #93AAB2; --line: #29414A;
+    --water: #4DB0EA; --water-soft: #12384C; --on-water: #08202E;
+    --ruler: #F0BC4B; --ruler-ink: #F6D88F; --ruler-soft: #33290F; --on-ruler: #2B1D00;
+    --good: #4CC38A; --good-soft: #123A29; --bad: #F07A68; --bad-soft: #44201A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1B21; --surface: #162830; --fg: #E4F0F3; --muted: #93AAB2; --line: #29414A;
+  --water: #4DB0EA; --water-soft: #12384C; --on-water: #08202E;
+  --ruler: #F0BC4B; --ruler-ink: #F6D88F; --ruler-soft: #33290F; --on-ruler: #2B1D00;
+  --good: #4CC38A; --good-soft: #123A29; --bad: #F07A68; --bad-soft: #44201A;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.7; }
+.page {
+  max-width: 880px; margin: 0 auto; padding-block: 24px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.25; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(30px, 6vw, 44px); font-weight: 700; }
+h2 { font-size: 24px; font-weight: 700; }
+h3 { font-size: 18px; font-weight: 700; }
+p { margin: 0; }
+.eyebrow { font-size: 13px; letter-spacing: .08em; color: var(--muted); font-weight: 500; }
+.intro { color: var(--muted); max-width: 60ch; margin-top: 6px; }
+header { display: flex; flex-direction: column; gap: 4px; margin-bottom: 20px; }
+
+/* tabs */
+.tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 18px; border-bottom: 2px solid var(--line); }
+.tab {
+  font: inherit; font-weight: 500; font-size: 16px; cursor: pointer; white-space: nowrap;
+  padding: 8px 16px; border: 0; border-radius: 8px 8px 0 0; background: transparent; color: var(--muted);
+}
+.tab[aria-selected="true"] { background: var(--surface); color: var(--fg); box-shadow: inset 0 -3px 0 var(--water); }
+.tab[data-tab="metre"][aria-selected="true"] { box-shadow: inset 0 -3px 0 var(--ruler); }
+:focus-visible { outline: 3px solid var(--water); outline-offset: 2px; }
+
+.panel { display: flex; flex-direction: column; gap: 18px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+.row { display: flex; flex-wrap: wrap; gap: 20px; }
+.col { flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+
+/* buttons */
+.btn {
+  font: inherit; font-weight: 500; cursor: pointer; padding: 8px 16px; border-radius: 8px;
+  border: 1.5px solid var(--line); background: var(--surface); color: var(--fg);
+}
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--water); border-color: var(--water); color: var(--on-water); }
+.btn.ruler { background: var(--ruler); border-color: var(--ruler); color: var(--on-ruler); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font: inherit; font-size: 15px; cursor: pointer; padding: 4px 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--fg); }
+.chip[aria-pressed="true"] { background: var(--water-soft); border-color: var(--water); font-weight: 700; }
+.chip.r[aria-pressed="true"] { background: var(--ruler-soft); border-color: var(--ruler); }
+.label { font-size: 14px; color: var(--muted); font-weight: 500; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* readout */
+.readout { display: flex; flex-wrap: wrap; gap: 8px 28px; align-items: baseline; }
+.big { font-family: var(--font-display); font-size: 44px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.big small { font-size: 20px; font-weight: 500; color: var(--muted); margin-left: 4px; }
+.eq { font-variant-numeric: tabular-nums; color: var(--muted); }
+.status { min-height: 1.7em; font-weight: 500; }
+
+input[type="range"] { width: 100%; accent-color: var(--water); height: 28px; }
+#len-slider { accent-color: var(--ruler); }
+
+/* beaker */
+.vessel-box { flex: 0 0 auto; padding: 14px 84px 0 0; }
+.beaker {
+  position: relative; width: 150px; height: 300px;
+  border: 3px solid var(--fg); border-top: 0; border-radius: 0 0 18px 18px;
+  background: color-mix(in srgb, var(--water-soft) 35%, var(--surface));
+}
+.water {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 0;
+  background: var(--water); border-radius: 0 0 15px 15px;
+  box-shadow: inset 0 4px 0 rgba(255,255,255,.35); transition: height .35s ease;
+}
+.tick { position: absolute; left: 0; height: 2px; width: 16px; background: var(--fg); opacity: .75; }
+.tick.major { width: 30px; opacity: 1; }
+.tlabel { position: absolute; left: calc(100% + 10px); transform: translateY(50%); font-size: 13px; line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tlabel b { display: block; font-weight: 700; }
+.tlabel span { color: var(--muted); font-size: 12px; }
+.pour-note { margin-top: 10px; font-size: 14px; color: var(--muted); }
+
+/* ruler */
+.ruler-wrap { padding: 0 2px; }
+.ruler { position: relative; height: 88px; background: var(--ruler-soft); border: 2px solid var(--ruler); border-radius: 6px; overflow: hidden; }
+.rt { position: absolute; top: 0; width: 1.5px; background: var(--ruler-ink); transform: translateX(-50%); }
+.rl { position: absolute; bottom: 6px; font-size: 13px; font-weight: 700; color: var(--ruler-ink); white-space: nowrap; }
+.fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--ruler); opacity: .38; transition: width .2s ease; }
+.pin { position: absolute; top: 0; bottom: 0; width: 4px; margin-left: -2px; background: var(--water); left: 0; transition: left .2s ease; }
+.bar-track { height: 16px; margin-top: 10px; border-radius: 8px; background: var(--ruler-soft); overflow: hidden; }
+.bar { height: 100%; width: 0; background: var(--ruler); border-radius: 8px; transition: width .2s ease; }
+
+.refs { display: flex; flex-direction: column; gap: 10px; }
+.ref { display: grid; grid-template-columns: 130px minmax(0, 1fr) 110px; gap: 10px; align-items: center; padding: 6px 10px; border-radius: 8px; border: 1.5px solid transparent; }
+.ref.near { border-color: var(--ruler); background: var(--ruler-soft); }
+.ref .nm { font-weight: 500; line-height: 1.4; }
+.ref .nm span { display: block; font-size: 13px; color: var(--muted); font-weight: 400; }
+.ref .tr { height: 12px; background: var(--line); border-radius: 6px; overflow: hidden; }
+.ref .tr i { display: block; height: 100%; background: var(--ruler-ink); opacity: .75; border-radius: 6px; }
+.ref .df { font-size: 13px; color: var(--muted); text-align: right; }
+@media (max-width: 520px) {
+  .ref { grid-template-columns: minmax(0, 1fr) 90px; }
+  .ref .tr { grid-column: 1 / -1; order: 3; }
+}
+
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px 18px; margin: 0; padding: 0; list-style: none; font-variant-numeric: tabular-nums; }
+.facts li { padding: 6px 0; border-bottom: 1px dashed var(--line); }
+.facts b { font-weight: 700; }
+
+/* converter */
+.field { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.field label { display: flex; flex-direction: column; gap: 2px; font-size: 14px; color: var(--muted); font-weight: 500; }
+input[type="number"], select {
+  font: inherit; font-size: 18px; color: var(--fg); background: var(--surface);
+  border: 1.5px solid var(--line); border-radius: 8px; padding: 6px 10px; min-width: 0; width: 170px;
+}
+.results { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.res { border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+.res.src { border-color: var(--water); background: var(--water-soft); }
+.res.src.r { border-color: var(--ruler); background: var(--ruler-soft); }
+.res .v { font-family: var(--font-display); font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; line-height: 1.3; }
+.res .u { font-size: 14px; color: var(--muted); }
+
+/* quiz */
+.qtext { font-family: var(--font-display); font-size: 24px; font-weight: 500; line-height: 1.4; }
+.opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.opt { font: inherit; font-size: 18px; font-weight: 500; cursor: pointer; padding: 12px; border-radius: 10px; border: 2px solid var(--line); background: var(--surface); color: var(--fg); font-variant-numeric: tabular-nums; }
+.opt:hover:not(:disabled) { border-color: var(--water); }
+.opt.ok { border-color: var(--good); background: var(--good-soft); }
+.opt.no { border-color: var(--bad); background: var(--bad-soft); }
+.opt:disabled { cursor: default; }
+.fb { min-height: 3.4em; }
+.fb.ok { color: var(--good); } .fb.no { color: var(--bad); }
+.fb span { display: block; color: var(--muted); }
+.progress { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--water); transition: width .3s ease; }
+.hidden-note { color: var(--muted); font-size: 14px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="page">
+  <header>
+    <span class="eyebrow">ಅಳತೆ ಲ್ಯಾಬ್</span>
+    <h1>ಲೀಟರ್ ಮತ್ತು ಮೀಟರ್</h1>
+    <p class="intro">ನೀರನ್ನು ಸುರಿದು ಲೀಟರ್ ಅಳೆಯಿರಿ. ಸ್ಕೇಲ್ ಎಳೆದು ಮೀಟರ್ ಅಳೆಯಿರಿ. ಕೊನೆಯಲ್ಲಿ ರಸಪ್ರಶ್ನೆಯಲ್ಲಿ ನಿಮ್ಮನ್ನು ಪರೀಕ್ಷಿಸಿಕೊಳ್ಳಿ.</p>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="litre">ಲೀಟರ್ (ಪರಿಮಾಣ)</button>
+    <button class="tab" role="tab" data-tab="metre">ಮೀಟರ್ (ಉದ್ದ)</button>
+    <button class="tab" role="tab" data-tab="convert">ಪರಿವರ್ತಕ</button>
+    <button class="tab" role="tab" data-tab="quiz">ರಸಪ್ರಶ್ನೆ</button>
+  </div>
+
+  <!-- LITRE -->
+  <section class="panel" id="p-litre" role="tabpanel">
+    <div class="card">
+      <div class="row">
+        <div class="vessel-box">
+          <div class="beaker" id="beaker"><div class="water" id="water"></div></div>
+        </div>
+        <div class="col">
+          <h2>ಬೀಕರ್‌ಗೆ ನೀರು ಸುರಿಯಿರಿ</h2>
+          <div class="readout">
+            <div class="big"><span id="vol-l">0.75</span><small>ಲೀಟರ್ (L)</small></div>
+            <div class="big"><span id="vol-ml">750</span><small>ಮಿ.ಲೀ. (mL)</small></div>
+          </div>
+          <div class="eq" id="l-eq"></div>
+          <div class="status" id="l-status" aria-live="polite"></div>
+          <div>
+            <div class="label">ಒಮ್ಮೆಗೆ ಎಷ್ಟು ಸುರಿಯಬೇಕು?</div>
+            <div class="chips" id="l-steps"></div>
+          </div>
+          <div class="btns">
+            <button class="btn primary" id="l-add">+ ಸುರಿಯಿರಿ</button>
+            <button class="btn" id="l-sub">− ತೆಗೆಯಿರಿ</button>
+            <button class="btn" id="l-clear">ಖಾಲಿ ಮಾಡಿ</button>
+          </div>
+          <input type="range" id="l-slider" min="0" max="2000" step="10" value="750" aria-label="ನೀರಿನ ಪ್ರಮಾಣ ಮಿಲಿಲೀಟರ್‌ಗಳಲ್ಲಿ">
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>ದಿನನಿತ್ಯದ ಪಾತ್ರೆಗಳು</h3>
+      <p class="hidden-note" style="margin-bottom:10px">ಒಂದನ್ನು ಒತ್ತಿ, ಬೀಕರ್‌ನಲ್ಲಿ ಆ ಪ್ರಮಾಣ ಎಷ್ಟು ಎಂದು ನೋಡಿ.</p>
+      <div class="btns" id="l-presets"></div>
+    </div>
+    <div class="card">
+      <h3>ನೆನಪಿಡಿ</h3>
+      <ul class="facts">
+        <li><b>1 ಲೀಟರ್</b> = 1000 ಮಿ.ಲೀ.</li>
+        <li><b>½ ಲೀಟರ್</b> = 500 ಮಿ.ಲೀ.</li>
+        <li><b>¼ ಲೀಟರ್</b> = 250 ಮಿ.ಲೀ.</li>
+        <li><b>1 ಕಿಲೋಲೀಟರ್</b> = 1000 ಲೀಟರ್</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- METRE -->
+  <section class="panel" id="p-metre" role="tabpanel" hidden>
+    <div class="card">
+      <h2>ಸ್ಕೇಲ್‌ನಲ್ಲಿ ಉದ್ದ ಅಳೆಯಿರಿ</h2>
+      <div class="readout" style="margin-top:10px">
+        <div class="big"><span id="len-m">1.25</span><small>ಮೀಟರ್ (m)</small></div>
+        <div class="big"><span id="len-cm">125</span><small>ಸೆಂ.ಮೀ. (cm)</small></div>
+        <div class="big"><span id="len-mm">1250</span><small>ಮಿ.ಮೀ. (mm)</small></div>
+      </div>
+      <div class="eq" id="len-eq" style="margin-block:6px 12px"></div>
+      <div class="ruler-wrap">
+        <div class="ruler" id="ruler"><div class="fill" id="fill"></div><div class="pin" id="pin"></div></div>
+        <div class="bar-track"><div class="bar" id="bar"></div></div>
+      </div>
+      <input type="range" id="len-slider" min="0" max="300" step="1" value="125" aria-label="ಉದ್ದ ಸೆಂಟಿಮೀಟರ್‌ಗಳಲ್ಲಿ" style="margin-top:12px">
+      <div class="row" style="margin-top:6px">
+        <div class="col" style="flex-basis:220px">
+          <div class="label">ಒಮ್ಮೆಗೆ ಎಷ್ಟು ಬದಲಿಸಬೇಕು?</div>
+          <div class="chips" id="m-steps"></div>
+        </div>
+        <div class="btns" style="align-self:flex-end">
+          <button class="btn ruler" id="m-add">+ ಹೆಚ್ಚಿಸಿ</button>
+          <button class="btn" id="m-sub">− ಕಡಿಮೆ ಮಾಡಿ</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>ಇದು ಯಾವುದಕ್ಕೆ ಹತ್ತಿರ?</h3>
+      <p class="hidden-note" style="margin-bottom:10px">ಸುಮಾರು ಅಳತೆಗಳು. ಒಂದನ್ನು ಒತ್ತಿದರೆ ಸ್ಕೇಲ್ ಆ ಉದ್ದಕ್ಕೆ ಹೋಗುತ್ತದೆ.</p>
+      <div class="refs" id="refs"></div>
+    </div>
+    <div class="card">
+      <h3>ನೆನಪಿಡಿ</h3>
+      <ul class="facts">
+        <li><b>1 ಮೀಟರ್</b> = 100 ಸೆಂ.ಮೀ.</li>
+        <li><b>1 ಸೆಂ.ಮೀ.</b> = 10 ಮಿ.ಮೀ.</li>
+        <li><b>1 ಮೀಟರ್</b> = 1000 ಮಿ.ಮೀ.</li>
+        <li><b>1 ಕಿಲೋಮೀಟರ್</b> = 1000 ಮೀಟರ್</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- CONVERT -->
+  <section class="panel" id="p-convert" role="tabpanel" hidden>
+    <div class="card" style="display:flex;flex-direction:column;gap:14px">
+      <h2>ಅಳತೆ ಪರಿವರ್ತಕ</h2>
+      <div class="chips" id="c-kind">
+        <button class="chip r" data-kind="len" aria-pressed="true">ಉದ್ದ</button>
+        <button class="chip" data-kind="vol" aria-pressed="false">ಪರಿಮಾಣ</button>
+      </div>
+      <div class="field">
+        <label for="c-val">ಸಂಖ್ಯೆ<input type="number" id="c-val" value="2.5" step="any" min="0" inputmode="decimal"></label>
+        <label for="c-unit">ಘಟಕ<select id="c-unit"></select></label>
+      </div>
+      <div class="results" id="c-res" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="panel" id="p-quiz" role="tabpanel" hidden>
+    <div class="card" style="display:flex;flex-direction:column;gap:14px" id="quiz-card"></div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  function fmt(n) { return Number(Number(n).toPrecision(12)).toLocaleString('en-IN', { maximumFractionDigits: 8 }); }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  /* ---------- tabs + hash routing ---------- */
+  var tabs = ['litre', 'metre', 'convert', 'quiz'];
+  function show(name) {
+    if (tabs.indexOf(name) < 0) name = 'litre';
+    tabs.forEach(function (t) {
+      $('#p-' + t).hidden = t !== name;
+    });
+    document.querySelectorAll('.tab').forEach(function (b) {
+      b.setAttribute('aria-selected', b.dataset.tab === name ? 'true' : 'false');
+    });
+  }
+  document.querySelectorAll('.tab').forEach(function (b) {
+    b.addEventListener('click', function () { location.hash = b.dataset.tab; show(b.dataset.tab); });
+  });
+  window.addEventListener('hashchange', function () { show(location.hash.slice(1)); });
+
+  /* ---------- LITRE ---------- */
+  var ml = 750, stepMl = 100, CAP = 2000;
+  var beaker = $('#beaker');
+  for (var i = 0; i <= 8; i++) {
+    var v = i * 250, major = i % 2 === 0, pos = v / CAP * 100;
+    var t = el('div', 'tick' + (major ? ' major' : '')); t.style.bottom = pos + '%'; t.style.marginBottom = '-1px';
+    beaker.appendChild(t);
+    if (major) {
+      var lb = el('div', 'tlabel'); lb.style.bottom = pos + '%';
+      var b = el('b', null, fmt(v / 1000) + ' L'); var s = el('span', null, fmt(v) + ' mL');
+      lb.appendChild(b); lb.appendChild(s); beaker.appendChild(lb);
+    }
+  }
+  function renderL() {
+    $('#water').style.height = (ml / CAP * 100) + '%';
+    $('#vol-l').textContent = fmt(ml / 1000);
+    $('#vol-ml').textContent = fmt(ml);
+    $('#l-eq').textContent = fmt(ml) + ' ಮಿ.ಲೀ. ÷ 1000 = ' + fmt(ml / 1000) + ' ಲೀಟರ್';
+    $('#l-slider').value = ml;
+    var g = Math.round(ml / 250 * 10) / 10;
+    var msg;
+    if (ml === 0) msg = 'ಬೀಕರ್ ಖಾಲಿ ಇದೆ.';
+    else if (ml >= CAP) msg = 'ಬೀಕರ್ ತುಂಬಿದೆ! ಇದು 2 ಲೀಟರ್.';
+    else msg = 'ಇದು ಸುಮಾರು ' + fmt(g) + ' ಲೋಟ ನೀರು (1 ಲೋಟ = 250 ಮಿ.ಲೀ.).';
+    $('#l-status').textContent = msg;
+  }
+  var lsteps = [[1000, '1 ಲೀಟರ್'], [500, '500 ಮಿ.ಲೀ.'], [100, '100 ಮಿ.ಲೀ.'], [10, '10 ಮಿ.ಲೀ.']];
+  lsteps.forEach(function (s) {
+    var c = el('button', 'chip', s[1]); c.setAttribute('aria-pressed', s[0] === stepMl ? 'true' : 'false');
+    c.addEventListener('click', function () {
+      stepMl = s[0];
+      document.querySelectorAll('#l-steps .chip').forEach(function (x) { x.setAttribute('aria-pressed', x === c ? 'true' : 'false'); });
+    });
+    $('#l-steps').appendChild(c);
+  });
+  $('#l-add').addEventListener('click', function () { ml = Math.min(CAP, ml + stepMl); renderL(); });
+  $('#l-sub').addEventListener('click', function () { ml = Math.max(0, ml - stepMl); renderL(); });
+  $('#l-clear').addEventListener('click', function () { ml = 0; renderL(); });
+  $('#l-slider').addEventListener('input', function (e) { ml = Number(e.target.value); renderL(); });
+  [['ಒಂದು ಚಮಚ', 5], ['ಒಂದು ಲೋಟ', 250], ['ಅರ್ಧ ಲೀಟರ್ ಬಾಟಲ್', 500], ['ಒಂದು ಲೀಟರ್ ಬಾಟಲ್', 1000], ['ಎರಡು ಲೀಟರ್ ಬಾಟಲ್', 2000]].forEach(function (p) {
+    var bt = el('button', 'btn', p[0] + ' · ' + fmt(p[1]) + ' ಮಿ.ಲೀ.');
+    bt.addEventListener('click', function () { ml = p[1]; renderL(); });
+    $('#l-presets').appendChild(bt);
+  });
+  renderL();
+
+  /* ---------- METRE ---------- */
+  var cm = 125, stepCm = 10, MAXCM = 300;
+  var ruler = $('#ruler');
+  for (var k = 0; k <= MAXCM; k += 10) {
+    var pct = k / MAXCM * 100;
+    var h = k % 100 === 0 ? 40 : (k % 50 === 0 ? 28 : 16);
+    var tk = el('div', 'rt'); tk.style.left = pct + '%'; tk.style.height = h + 'px'; ruler.appendChild(tk);
+    if (k % 100 === 0) {
+      var rl = el('div', 'rl', fmt(k / 100) + ' ಮೀ'); rl.style.left = pct + '%';
+      rl.style.transform = k === 0 ? 'translateX(8px)' : (k === MAXCM ? 'translateX(calc(-100% - 8px))' : 'translateX(-50%)');
+      ruler.appendChild(rl);
+    }
+  }
+  var refs = [['ಪೆನ್ಸಿಲ್', 17], ['ಶಾಲಾ ಸ್ಕೇಲ್', 30], ['ಮೇಜಿನ ಎತ್ತರ', 75], ['ಮಗುವಿನ ಎತ್ತರ', 140], ['ಬಾಗಿಲಿನ ಎತ್ತರ', 200]];
+  var refEls = refs.map(function (r) {
+    var row = el('div', 'ref');
+    var nm = el('div', 'nm', r[0]); nm.appendChild(el('span', null, 'ಸುಮಾರು ' + fmt(r[1]) + ' ಸೆಂ.ಮೀ.'));
+    var tr = el('div', 'tr'); var fill = el('i'); fill.style.width = (r[1] / MAXCM * 100) + '%'; tr.appendChild(fill);
+    var df = el('div', 'df');
+    var bt = el('button', 'btn', 'ಇಲ್ಲಿಗೆ'); bt.style.padding = '2px 10px'; bt.style.marginBottom = '4px';
+    bt.addEventListener('click', function () { cm = r[1]; renderM(); });
+    var wrap = el('div'); wrap.style.textAlign = 'right'; wrap.appendChild(bt); wrap.appendChild(df);
+    row.appendChild(nm); row.appendChild(tr); row.appendChild(wrap);
+    $('#refs').appendChild(row);
+    return { row: row, df: df, v: r[1] };
+  });
+  function renderM() {
+    var pct = cm / MAXCM * 100;
+    $('#fill').style.width = pct + '%'; $('#pin').style.left = pct + '%'; $('#bar').style.width = pct + '%';
+    $('#len-m').textContent = fmt(cm / 100); $('#len-cm').textContent = fmt(cm); $('#len-mm').textContent = fmt(cm * 10);
+    var whole = Math.floor(cm / 100), rest = cm % 100;
+    $('#len-eq').textContent = whole + ' ಮೀ ' + fmt(rest) + ' ಸೆಂ.ಮೀ. · ' + fmt(cm) + ' ಸೆಂ.ಮೀ. ÷ 100 = ' + fmt(cm / 100) + ' ಮೀಟರ್';
+    $('#len-slider').value = cm;
+    var best = 0, bd = Infinity;
+    refEls.forEach(function (r, i) { var d = Math.abs(cm - r.v); if (d < bd) { bd = d; best = i; } });
+    refEls.forEach(function (r, i) {
+      var d = cm - r.v;
+      r.df.textContent = Math.abs(d) <= 2 ? 'ಬಹುತೇಕ ಸಮ' : fmt(Math.abs(d)) + ' ಸೆಂ.ಮೀ. ' + (d > 0 ? 'ಹೆಚ್ಚು' : 'ಕಡಿಮೆ');
+      r.row.classList.toggle('near', i === best && cm > 0);
+    });
+  }
+  [[1, '1 ಸೆಂ.ಮೀ.'], [10, '10 ಸೆಂ.ಮೀ.'], [100, '1 ಮೀಟರ್']].forEach(function (s) {
+    var c = el('button', 'chip r', s[1]); c.setAttribute('aria-pressed', s[0] === stepCm ? 'true' : 'false');
+    c.addEventListener('click', function () {
+      stepCm = s[0];
+      document.querySelectorAll('#m-steps .chip').forEach(function (x) { x.setAttribute('aria-pressed', x === c ? 'true' : 'false'); });
+    });
+    $('#m-steps').appendChild(c);
+  });
+  $('#m-add').addEventListener('click', function () { cm = Math.min(MAXCM, cm + stepCm); renderM(); });
+  $('#m-sub').addEventListener('click', function () { cm = Math.max(0, cm - stepCm); renderM(); });
+  $('#len-slider').addEventListener('input', function (e) { cm = Number(e.target.value); renderM(); });
+  renderM();
+
+  /* ---------- CONVERTER ---------- */
+  var kinds = {
+    len: { rel: 'ಒಂದು ಮೀಟರ್ = 100 ಸೆಂ.ಮೀ. = 1000 ಮಿ.ಮೀ.', units: [['km', 'ಕಿಲೋಮೀಟರ್', 1000], ['m', 'ಮೀಟರ್', 1], ['cm', 'ಸೆಂಟಿಮೀಟರ್', 0.01], ['mm', 'ಮಿಲಿಮೀಟರ್', 0.001]], start: 1, val: 2.5 },
+    vol: { rel: 'ಒಂದು ಲೀಟರ್ = 1000 ಮಿ.ಲೀ.', units: [['kL', 'ಕಿಲೋಲೀಟರ್', 1000], ['L', 'ಲೀಟರ್', 1], ['mL', 'ಮಿಲಿಲೀಟರ್', 0.001]], start: 1, val: 1.5 }
+  };
+  var kind = 'len';
+  function fillUnits() {
+    var sel = $('#c-unit'); sel.textContent = '';
+    kinds[kind].units.forEach(function (u, i) {
+      var o = el('option', null, u[1] + ' (' + u[0] + ')'); o.value = i; sel.appendChild(o);
+    });
+    sel.value = kinds[kind].start; $('#c-val').value = kinds[kind].val;
+  }
+  function renderC() {
+    var K = kinds[kind], idx = Number($('#c-unit').value), raw = parseFloat($('#c-val').value);
+    var box = $('#c-res'); box.textContent = '';
+    if (isNaN(raw) || raw < 0) { box.appendChild(el('p', 'hidden-note', 'ಸೊನ್ನೆ ಅಥವಾ ಹೆಚ್ಚಿನ ಸಂಖ್ಯೆಯನ್ನು ಬರೆಯಿರಿ.')); return; }
+    var base = raw * K.units[idx][2];
+    K.units.forEach(function (u, i) {
+      var d = el('div', 'res' + (i === idx ? ' src' + (kind === 'len' ? ' r' : '') : ''));
+      d.appendChild(el('div', 'v', fmt(base / u[2]) + ' ' + u[0]));
+      d.appendChild(el('div', 'u', u[1]));
+      box.appendChild(d);
+    });
+    box.appendChild(el('p', 'hidden-note', K.rel));
+    box.lastChild.style.gridColumn = '1 / -1';
+  }
+  document.querySelectorAll('#c-kind .chip').forEach(function (c) {
+    c.addEventListener('click', function () {
+      kind = c.dataset.kind;
+      document.querySelectorAll('#c-kind .chip').forEach(function (x) { x.setAttribute('aria-pressed', x === c ? 'true' : 'false'); });
+      fillUnits(); renderC();
+    });
+  });
+  $('#c-val').addEventListener('input', renderC);
+  $('#c-unit').addEventListener('change', renderC);
+  fillUnits(); renderC();
+
+  /* ---------- QUIZ ---------- */
+  var TOTAL = 5;
+  var types = [
+    { vals: [0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 0.25, 0.75], unit: 'ಮಿ.ಲೀ.', ans: function (v) { return v * 1000; },
+      q: function (v) { return fmt(v) + ' ಲೀಟರ್ = ಎಷ್ಟು ಮಿಲಿಲೀಟರ್?'; },
+      why: function (v, a) { return '1 ಲೀಟರ್ = 1000 ಮಿ.ಲೀ. ಆದ್ದರಿಂದ ' + fmt(v) + ' × 1000 = ' + fmt(a) + ' ಮಿ.ಲೀ.'; } },
+    { vals: [500, 1500, 2000, 2500, 3000, 4000, 250, 750], unit: 'ಲೀಟರ್', ans: function (v) { return v / 1000; },
+      q: function (v) { return fmt(v) + ' ಮಿಲಿಲೀಟರ್ = ಎಷ್ಟು ಲೀಟರ್?'; },
+      why: function (v, a) { return '1000 ಮಿ.ಲೀ. = 1 ಲೀಟರ್ ಆದ್ದರಿಂದ ' + fmt(v) + ' ÷ 1000 = ' + fmt(a) + ' ಲೀಟರ್.'; } },
+    { vals: [1, 2, 3, 1.5, 2.5, 0.5, 4, 0.25], unit: 'ಸೆಂ.ಮೀ.', ans: function (v) { return v * 100; },
+      q: function (v) { return fmt(v) + ' ಮೀಟರ್ = ಎಷ್ಟು ಸೆಂಟಿಮೀಟರ್?'; },
+      why: function (v, a) { return '1 ಮೀಟರ್ = 100 ಸೆಂ.ಮೀ. ಆದ್ದರಿಂದ ' + fmt(v) + ' × 100 = ' + fmt(a) + ' ಸೆಂ.ಮೀ.'; } },
+    { vals: [100, 200, 350, 150, 500, 50, 250, 75], unit: 'ಮೀಟರ್', ans: function (v) { return v / 100; },
+      q: function (v) { return fmt(v) + ' ಸೆಂಟಿಮೀಟರ್ = ಎಷ್ಟು ಮೀಟರ್?'; },
+      why: function (v, a) { return '100 ಸೆಂ.ಮೀ. = 1 ಮೀಟರ್ ಆದ್ದರಿಂದ ' + fmt(v) + ' ÷ 100 = ' + fmt(a) + ' ಮೀಟರ್.'; } },
+    { vals: [1, 2, 0.5, 3], unit: 'ಮಿ.ಮೀ.', ans: function (v) { return v * 1000; },
+      q: function (v) { return fmt(v) + ' ಮೀಟರ್ = ಎಷ್ಟು ಮಿಲಿಮೀಟರ್?'; },
+      why: function (v, a) { return '1 ಮೀಟರ್ = 1000 ಮಿ.ಮೀ. ಆದ್ದರಿಂದ ' + fmt(v) + ' × 1000 = ' + fmt(a) + ' ಮಿ.ಮೀ.'; } },
+    { vals: [1, 2, 3, 0.5, 1.5, 5], unit: 'ಮೀಟರ್', ans: function (v) { return v * 1000; },
+      q: function (v) { return fmt(v) + ' ಕಿಲೋಮೀಟರ್ = ಎಷ್ಟು ಮೀಟರ್?'; },
+      why: function (v, a) { return '1 ಕಿ.ಮೀ. = 1000 ಮೀಟರ್ ಆದ್ದರಿಂದ ' + fmt(v) + ' × 1000 = ' + fmt(a) + ' ಮೀಟರ್.'; } },
+    { vals: [4, 6, 8, 10], unit: 'ಲೀಟರ್', ans: function (v) { return v * 0.25; },
+      q: function (v) { return 'ಒಂದು ಲೋಟದಲ್ಲಿ 250 ಮಿ.ಲೀ. ನೀರು ಹಿಡಿಯುತ್ತದೆ. ' + v + ' ಲೋಟ ನೀರು ಎಷ್ಟು ಲೀಟರ್?'; },
+      why: function (v, a) { return v + ' × 250 = ' + fmt(v * 250) + ' ಮಿ.ಲೀ. = ' + fmt(a) + ' ಲೀಟರ್.'; } },
+    { vals: [4, 6, 8, 10], unit: 'ಮೀಟರ್', ans: function (v) { return v * 0.5; },
+      q: function (v) { return 'ಒಂದು ಹಗ್ಗದ ತುಂಡು 50 ಸೆಂ.ಮೀ. ಉದ್ದ ಇದೆ. ' + v + ' ತುಂಡುಗಳನ್ನು ಜೋಡಿಸಿದರೆ ಎಷ್ಟು ಮೀಟರ್?'; },
+      why: function (v, a) { return v + ' × 50 = ' + fmt(v * 50) + ' ಸೆಂ.ಮೀ. = ' + fmt(a) + ' ಮೀಟರ್.'; } }
+  ];
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  var round = null;
+  function makeRound() {
+    var order = shuffle(types).slice(0, TOTAL);
+    round = { n: 0, score: 0, qs: order.map(function (t) {
+      var v = t.vals[Math.floor(Math.random() * t.vals.length)], a = Number(t.ans(v).toPrecision(10));
+      var cand = [a * 10, a / 10, a * 100, a / 100, a * 2, a / 2].map(function (x) { return Number(x.toPrecision(10)); });
+      var seen = {}, uniq = [];
+      cand.forEach(function (x) { if (x > 0 && x !== a && !seen[x]) { seen[x] = 1; uniq.push(x); } });
+      var opts = shuffle([a].concat(shuffle(uniq).slice(0, 3)));
+      return { t: t, v: v, a: a, opts: opts };
+    }) };
+  }
+  function renderQ() {
+    var card = $('#quiz-card'); card.textContent = '';
+    if (round.n >= TOTAL) {
+      card.appendChild(el('h2', null, 'ರಸಪ್ರಶ್ನೆ ಮುಗಿಯಿತು'));
+      card.appendChild(el('div', 'big', round.score + ' / ' + TOTAL));
+      var m = round.score === TOTAL ? 'ಅದ್ಭುತ! ಎಲ್ಲವೂ ಸರಿ.' : (round.score >= 3 ? 'ಚೆನ್ನಾಗಿದೆ! ಇನ್ನೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ.' : 'ಲೀಟರ್ ಮತ್ತು ಮೀಟರ್ ಟ್ಯಾಬ್‌ಗಳಲ್ಲಿ ಇನ್ನಷ್ಟು ಆಡಿ, ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.');
+      card.appendChild(el('p', null, m));
+      var again = el('button', 'btn primary', 'ಮತ್ತೆ ಆಡಿ'); again.style.alignSelf = 'flex-start';
+      again.addEventListener('click', function () { makeRound(); renderQ(); });
+      card.appendChild(again); return;
+    }
+    var q = round.qs[round.n];
+    var head = el('div', 'label', 'ಪ್ರಶ್ನೆ ' + (round.n + 1) + ' / ' + TOTAL + ' · ಸರಿ ಉತ್ತರಗಳು: ' + round.score);
+    var pr = el('div', 'progress'); var pi = el('i'); pi.style.width = (round.n / TOTAL * 100) + '%'; pr.appendChild(pi);
+    card.appendChild(head); card.appendChild(pr);
+    card.appendChild(el('p', 'qtext', q.t.q(q.v)));
+    var opts = el('div', 'opts'); var fb = el('div', 'fb'); fb.setAttribute('aria-live', 'polite');
+    var next = el('button', 'btn primary', round.n + 1 === TOTAL ? 'ಫಲಿತಾಂಶ ನೋಡಿ' : 'ಮುಂದಿನ ಪ್ರಶ್ನೆ'); next.hidden = true; next.style.alignSelf = 'flex-start';
+    q.opts.forEach(function (o) {
+      var b = el('button', 'opt', fmt(o) + ' ' + q.t.unit);
+      b.addEventListener('click', function () {
+        var right = o === q.a;
+        if (right) round.score++;
+        opts.querySelectorAll('.opt').forEach(function (x, i) {
+          x.disabled = true;
+          if (q.opts[i] === q.a) x.classList.add('ok');
+          else if (x === b) x.classList.add('no');
+        });
+        fb.className = 'fb ' + (right ? 'ok' : 'no');
+        fb.textContent = right ? 'ಸರಿಯಾಗಿದೆ!' : 'ಸರಿಯಲ್ಲ. ಸರಿ ಉತ್ತರ: ' + fmt(q.a) + ' ' + q.t.unit;
+        fb.appendChild(el('span', null, q.t.why(q.v, q.a)));
+        next.hidden = false; next.focus();
+      });
+      opts.appendChild(b);
+    });
+    next.addEventListener('click', function () { round.n++; renderQ(); });
+    card.appendChild(opts); card.appendChild(fb); card.appendChild(next);
+  }
+  makeRound(); renderQ();
+
+  show(location.hash.slice(1));
+})();
+</script>
+
+</body></html>
